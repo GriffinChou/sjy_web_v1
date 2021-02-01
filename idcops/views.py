@@ -5,6 +5,7 @@ import os
 import json
 import time
 
+from django.http import JsonResponse
 from django.apps import apps
 from django.shortcuts import render
 from django.conf import settings
@@ -36,9 +37,10 @@ from idcops.models import (
     Syslog, ContentType, Zonemap, Client,
     Idc, Attachment
 )
-
+from .models import User
 from idcops.forms import (
-    ImportExcelForm, ZonemapNewForm, InitIdcForm, ImportOnlineForm
+    ImportExcelForm, ZonemapNewForm, InitIdcForm, ImportOnlineForm,InventoryForm,
+    # posform,
 )
 from idcops.imports import import_online
 
@@ -171,7 +173,7 @@ class IndexView(BaseRequiredMixin, TemplateView):
             movedown = nlogs.filter(action_flag="下架").count()
             data['movedown'].append(movedown-cancel_movedown)
         return data
-
+#Rack部门管理
     def make_rack_dynamic_change(self):
         content_type = ContentType.objects.get_for_model(Rack)
         logs = Syslog.objects.filter(
@@ -587,3 +589,104 @@ class ImportExcelView(BaseRequiredMixin, FormView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+def test(request):
+    form_class = InventoryForm
+    return render(request,'test/test.html',locals())
+
+#我写的ajax请求
+def ajax(request):
+    if request.method == 'POST':
+        print(request.POST)
+        data = {'status':'0','msg':'请求成功！','data':User}
+        return JsonResponse(data)
+    else:
+        return render(request,'ajax/ajax.html')
+
+
+from photo_Nopos_record import file_than_pos
+from photo_Nopos_record import test_demo,file_rename_1
+
+def dopos(request):
+    return render(request, 'pos.html')
+
+def pos(request):
+    data=None
+    j={}
+    if request.method == 'GET':
+        path1 = request.GET.get("path1", None)
+        path2 = request.GET.get("path2", None)
+        path3 = request.GET.get("path3", None)
+        path4 = request.GET.get("path4", None)
+        path5 = request.GET.get("path5", None)
+        pos1 = request.GET.get("pos1",None)
+        pos2 = request.GET.get("pos2", None)
+        pos3 = request.GET.get("pos3", None)
+        pos4 = request.GET.get("pos4", None)
+        pos5 = request.GET.get("pos5",None)
+        path = [path1,path2,path3,path4,path5]
+        pos = [pos1,pos2,pos3,pos4,pos5]
+        print('path:',path)
+        print('pos:', pos)
+        # data = file_than_pos.main(path, pos)
+        data_test = test_demo.ksa(path,pos)
+        data = data_test.than()
+        # print(type(data))
+        # newdata = ''.json(data)
+        print('data:',data)
+        print('第一组：', data[0])
+        print('第二组：', data[1])
+        print('第三组：', data[2])
+        print('第四组：', data[3])
+        print('第五组：', data[4])
+        print('结果：',data[6])
+        result = [data[0],data[1],data[2],data[3],data[4],data[5]]
+        result1 = data[6]
+        dic={"count":result,'result':result1}
+        j=json.dumps(dic)
+        print('result:',result)
+        print('result1:',result1)
+    else:
+        print('错了')
+    return HttpResponse(j)
+
+
+#pos的form
+# class pos(BaseRequiredMixin, FormView):
+#     form_class = posform
+#     def get_template_names(self):
+#         return [
+#             "{0}/pos.html".format(self.model_name),
+#             "base/base.html"
+#         ]
+
+#文件重命名并导出
+def rename(request):
+    data1 = None
+    if request.method == 'GET':
+        path1 = request.GET.get("path1", None)
+        path2 = request.GET.get("path2", None)
+        path3 = request.GET.get("path3", None)
+        path4 = request.GET.get("path4", None)
+        path5 = request.GET.get("path5", None)
+        pos1 = request.GET.get("pos1", None)
+        pos2 = request.GET.get("pos2", None)
+        pos3 = request.GET.get("pos3", None)
+        pos4 = request.GET.get("pos4", None)
+        pos5 = request.GET.get("pos5", None)
+        path = [path1, path2, path3, path4, path5]
+        pos = [pos1, pos2, pos3, pos4, pos5]
+        print('path:', path)
+        print('pos:', pos)
+        # data = file_than_pos.main(path, pos)
+        data1 = file_rename_1.file_rename(path, pos)
+        print('返回的data',data1)
+        data1 = HttpResponse(data1)
+        # s = test_demo.ksa('size')
+        # print("大小",s)
+
+        print('data:', data1)
+    else:
+        print('错了')
+    return HttpResponse(data1)

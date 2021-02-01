@@ -57,7 +57,6 @@
     {% block main-sidebar %}
     <section class="sidebar">
       <ul class="sidebar-menu" data-widget="tree">
-
         {%for menu in menus%}<li class="header"></li>
           {%for m in menu%}
           <li{%if m.model_name in request.path %} class="active"{%endif%}>
@@ -67,10 +66,12 @@
           </li>
           {%endfor%}
         {%endfor%}
+
+
       </ul>
     </section>
-
   {% endblock %}
+      <a href="dopos/pos.html" style=" color:#f5f4f4; font-size:15px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pos处理</a>
   </aside>
   {% endcache %}
   <div class="content-wrapper">

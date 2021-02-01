@@ -1,0 +1,191 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+<aside class="main-sidebar no-print">
+    {% block main-sidebar %}
+    <section class="sidebar">
+      <ul class="sidebar-menu" data-widget="tree">
+        {%for menu in menus%}<li class="header"></li>
+          {%for m in menu%}
+          <li{%if m.model_name in request.path %} class="active"{%endif%}>
+            <a href="/list/{{m.model_name}}/">
+              <i class="{{m.icon}} {{m.icon_color}}"></i>
+              <span>{{m.verbose_name}}</span></a>
+          </li>
+          {%endfor%}
+        {%endfor%}
+      </ul>
+    </section>
+
+  {% endblock %}
+  </aside>
+
+<div class="content-wrapper">
+    <section class="content-header">
+    {% block content-header %}<h1>pos更名 <small> pos整理和文件导出</small></h1>{% endblock %}
+      <ol class="breadcrumb">
+        {% block breadcrumb %}
+        <li><a href="{% url 'idcops:index' %}"><i class="fa fa-dashboard"></i>
+          {% if meta %}{{meta.logo}}{% else %}仪表盘{% endif %}
+        </a></li>
+        <li class="active"><i class="{{meta.icon}}"></i> {{meta.verbose_name}}</li>
+        {% endblock %}
+      </ol>
+    </section>
+ </div>
+{% block main-content %}
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="row">
+        {%for item in state_items%}
+  <div class="col-md-3 col-sm-6 col-xs-12">
+    <div class="info-box">
+      <span class="info-box-icon {{item.icon_color}}"><i class="fa {{item.icon}}"></i></span>
+      <div class="info-box-content">
+        <a href="{%url 'idcops:list' item.model_name%}">
+          <span class="info-box-text">{{item.verbose_name}}</span>
+        </a>
+        <span class="info-box-number">{{item.count}}<small> {{item.metric}}</small></span>
+        {% if item.model_name == 'rack' %}<span class="text-muted"></span>{% endif %}
+      </div>
+      <!-- /.info-box-content -->
+    </div>
+    <!-- /.info-box -->
+  </div>
+  <!-- /.col -->
+  {%endfor state_items%}
+  <div class="clearfix visible-sm-block"></div>
+</div>
+<form action="{url 'idcops:pos'}" method="POST" enctype="multipart/form-data" id="form">
+    {% csrf_token %}
+<table class="table" align="center">
+	<thead id="head">
+		<tr>
+			<th>文件路径</th>
+			<th>pos路径</th>
+			<th>统计数目</th>
+            <!--<th>文件的大小与数目</th>-->
+            <th>文件输出路径</th>
+		</tr>
+	</thead>
+	<tbody id="tabletext">
+		<tr class="active">
+			<td><input type="text" placeholder="请输入文件路径一" name="path1"></td>
+			<td><input type="text" placeholder="请输入pos路径一" name="pos1"></td>
+			<td>
+                <input type="text" id="a1" readonly style="width:200px;" placeholder="返回处理的结果">
+            </td>
+			<td><input type="text" id="b1" readonly style="width:400px;" placeholder="新生成的文件路径"></td>
+
+		<tr class="success">
+			<td><input placeholder="请输入文件路径二" name="path2"></td>
+			<td><input placeholder="请输入pos路径二" name="pos2"></td>
+			<td>
+                <input type="text" id="a2" readonly style="width:200px;" placeholder="返回处理的结果">
+            </td>
+			<td></td>
+            <td></td>
+		</tr>
+		<tr  class="warning">
+			<td><input placeholder="请输入文件路径三" name="path3"></td>
+			<td><input placeholder="请输入pos路径三" name="pos3"></td>
+			<td>
+                <input type="text" id="a3" readonly style="width:200px;" placeholder="返回处理的结果">
+            </td>
+			<td></td>
+		</tr>
+		<tr  class="danger">
+			<td><input placeholder="请输入文件路径四" name="path4"></td>
+			<td><input placeholder="输入pos路径四" name="pos4"></td>
+			<td>
+                <input type="text" id="a4" readonly style="width:200px;" placeholder="返回处理的结果">
+            </td>
+			<td></td>
+		</tr>
+    <tr  class="active">
+			<td><input placeholder="请输入文件路径五" name="path5"></td>
+			<td><input placeholder="输入pos路径五" name="pos5"></td>
+			<td>
+                <input type="text" id="a5" readonly style="width:200px;" placeholder="返回处理的结果">
+            </td>
+			<td></td>
+		</tr>
+	</tbody>
+
+</table>
+     匹配结果： <input type="text" id="a6" readonly style="width:800px;">
+<div class="btn-group btn-group-lg">
+   <input type="button" class="btn btn-default" onclick="pos()" value="pos整理" style="margin-left:200px; margin-top:20px" ></input>
+    <input type="button" class="btn btn-default" onclick="rename()" value="文件重命名导出" style="margin-left:700px; margin-top:20px"></input>
+</div>
+    </form>
+
+<script>
+        function pos() {
+         $.ajax({
+                url:'/pos',
+                type:'GET',
+                data:$('#form').serialize(),
+                async : false,
+                datatype: 'json',
+                success:function(data){
+                    if(data != ''){
+                        //alert(data)
+                        //aa = data.split(", [",1)
+                        //pp = data.match(/(?<=\[).*(?=\])/);
+                        //var courseno = pp[0];
+                        //alert('aaa'+courseno)
+                         var newData = JSON.stringify(data);
+                        json=JSON.parse(data)
+                        console.log(json.count)
+                        console.log('result'+json.result)
+                        result=json.result
+                        document.getElementById('a6').value=result;
+                        count=json.count
+                        list=['a1','a2','a3','a4','a5']
+                        for(i=0;i<count.length;i++){
+                            console.log(count[i]);
+                            document.getElementById(list[i]).value=count[i];
+                        }
+                        console.log('result'+json.result)
+
+
+                    }
+                    else{
+                        alert("用户名或密码错误")
+                    }
+                },
+                error:function (data) {
+                    console.log('失败！')
+                    console.log(data)
+                    }
+            })
+    }
+        function rename() {
+            $.ajax({
+                 url:'/rename',
+                type:'GET',
+                data:$('#form').serialize(),
+                async : false,
+                datatype: 'json',
+                success:function(data){
+                    if(data != ''){
+                        var newData = JSON.stringify(data);
+                        document.getElementById('b1').value=newData
+                    }
+                    else{
+                        alert("失败")
+                    }
+                },
+                error:function (data) {
+                    console.log('失败！')
+                    console.log(data)
+                    }
+            })
+        }
+    </script>
+</body>
+
+{% endblock %}
+
+
+

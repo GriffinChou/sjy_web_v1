@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.conf.urls import url, include, static
+from django.urls import path
 from idcops import views
 from idcops.list import ListModelView, ConfigUserListView
 from idcops.detail import DetailModelView
 from idcops.edit import NewModelView, EditModelView
+
 
 app_name = 'idcops'
 
@@ -22,6 +24,9 @@ accounts_urls = [
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         views.reset, name='password_reset_confirm'),
     url(r'^reset/done/$', views.reset_done, name='password_reset_complete'),
+
+
+
 ]
 
 
@@ -45,6 +50,12 @@ urlpatterns = [
         views.SummernoteUploadAttachment.as_view(), name='upload'),
     url(r'^import/(?P<model>\w+)/$',
         views.ImportExcelView.as_view(), name='import'),
+    #
+    url('dopos/',views.dopos,name='dopos'),
+    url('pos/',views.pos,name = 'pos'),
+    url('ajax/',views.ajax,name='ajax'),
+    url('rename/',views.rename,name='rename')
+
 ]
 
 
